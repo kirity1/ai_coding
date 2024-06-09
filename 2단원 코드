@@ -1,0 +1,58 @@
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': ['F'],
+    'F': []
+}
+
+def dfs(graph, start_node):
+    visited = []  # 방문한 노드를 저장할 리스트
+    stack = [start_node]  # 스택에 시작 노드를 추가
+
+    while stack:  # 스택이 비어있지 않은 동안 반복
+        node = stack.pop()  # 스택의 마지막 노드를 꺼냄
+        if node not in visited:  # 해당 노드를 방문하지 않았다면
+            visited.append(node)  # 방문한 노드로 추가
+            stack.extend(graph[node])  # 인접 노드를 스택에 추가 (순서대로 추가됨)
+
+    return visited  # 방문한 노드를 반환
+
+# DFS 호출
+visited_nodes = dfs(graph, 'A')
+print("DFS 방문 순서:", visited_nodes)
+
+def bfs(graph, start_node):
+    visited = []  # 방문한 노드를 저장할 리스트
+    queue = deque([start_node])  # 큐에 시작 노드를 추가
+
+    while queue:  # 큐가 비어있지 않은 동안 반복
+        node = queue.popleft()  # 큐의 첫 번째 노드를 꺼냄
+        if node not in visited:  # 해당 노드를 방문하지 않았다면
+            visited.append(node)  # 방문한 노드로 추가
+            queue.extend(graph[node])  # 인접 노드를 큐에 추가 (순서대로 추가됨)
+
+    return visited  # 방문한 노드를 반환
+
+# BFS 호출
+visited_nodes = bfs(graph, 'A')
+print("BFS 방문 순서:", visited_nodes)
+
+def dls(graph, start_node, limit):
+    def recursive_dls(node, depth):
+        if depth > limit:  # 현재 깊이가 제한을 초과하면 종료
+            return
+        if node not in visited:  # 해당 노드를 방문하지 않았다면
+            visited.append(node)  # 방문한 노드로 추가
+            for neighbor in graph[node]:  # 인접 노드를 탐색
+                recursive_dls(neighbor, depth + 1)  # 깊이를 증가시키며 재귀 호출
+
+    visited = []  # 방문한 노드를 저장할 리스트
+    recursive_dls(start_node, 0)  # 초기 깊이를 0으로 설정하여 탐색 시작
+    return visited  # 방문한 노드를 반환
+
+# DLS 호출
+limit = 2  # 탐색 깊이 제한
+visited_nodes = dls(graph, 'A', limit)
+print("DLS 방문 순서:", visited_nodes)
