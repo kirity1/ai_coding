@@ -1,0 +1,141 @@
+#N-queen 문제 알고리즘
+class State:
+    def __init__(self, board, n, depth=0):
+        self.board = board
+        self.n = n
+        self.depth = depth
+
+    def is_safe(self, row, col):
+        # 같은 열에 다른 퀸이 있는지 확인
+        for i in range(row):
+            if self.board[i][col] == 1:
+                return False
+
+        # 왼쪽 위 대각선에 다른 퀸이 있는지 확인
+        i, j = row, col
+        while i >= 0 and j >= 0:
+            if self.board[i][j] == 1:
+                return False
+            i -= 1
+            j -= 1
+
+        # 오른쪽 위 대각선에 다른 퀸이 있는지 확인
+        i, j = row, col
+        while i >= 0 and j < self.n:
+            if self.board[i][j] == 1:
+                return False
+            i -= 1
+            j += 1
+
+        return True
+
+    def expand(self, depth):
+        result = []
+        row = depth
+        for col in range(self.n):
+            if self.is_safe(row, col):
+                new_board = [row[:] for row in self.board]
+                new_board[row][col] = 1
+                result.append(State(new_board, self.n, depth + 1))
+        return result
+
+    def __str__(self):
+        return "\n".join(" ".join(str(cell) for cell in row) for row in self.board) + "\n" + "-" * (2 * self.n - 1)
+
+    def __eq__(self, other):
+        return self.board == other.board
+
+    def __ne__(self, other):
+        return self.board != other.board
+
+
+def solve_n_queens(n):
+    # 초기 상태 생성
+    initial_board = [[0 for _ in range(n)] for _ in range(n)]
+    initial_state = State(initial_board, n)
+
+    open_queue = []
+    open_queue.append(initial_state)
+
+    while open_queue:
+        current = open_queue.pop(0)
+        if current.depth == n:
+            print("해결된 체스판:")
+            print(current)
+            return True
+
+        for state in current.expand(current.depth):
+            open_queue.append(state)
+
+    print("해결책이 존재하지 않습니다.")
+    return False
+
+
+# 실행 예제
+n = 8
+solve_n_queens(n)
+
+#tsp 문제 해결 알고리즘
+class State:
+    def __init__(self, path, cost, n, matrix):
+        self.path = path
+        self.cost = cost
+        self.n = n
+        self.matrix = matrix
+
+    def expand(self):
+        result = []
+        last_city = self.path[-1]
+        for next_city in range(self.n):
+            if next_city not in self.path:
+                new_path = self.path + [next_city]
+                new_cost = self.cost + self.matrix[last_city][next_city]
+                result.append(State(new_path, new_cost, self.n, self.matrix))
+        return result
+
+    def __str__(self):
+        return "Path: " + " -> ".join(map(str, self.path)) + ", Cost: " + str(self.cost)
+
+    def __eq__(self, other):
+        return self.path == other.path and self.cost == other.cost
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+def tsp(matrix):
+    n = len(matrix)
+    initial_state = State([0], 0, n, matrix)
+
+    open_queue = [initial_state]
+    best_state = None
+
+    while open_queue:
+        current = open_queue.pop(0)
+        if len(current.path) == n:
+            current.path.append(0)
+            current.cost += matrix[current.path[-2]][0]
+            if best_state is None or current.cost < best_state.cost:
+                best_state = current
+            continue
+
+        for state in current.expand():
+            open_queue.append(state)
+
+    if best_state:
+        print("최적 경로:")
+        print(best_state)
+        return best_state
+    else:
+        print("해결책이 존재하지 않습니다.")
+        return None
+
+# 실행 예제
+matrix = [
+    [0, 29, 20, 21],
+    [29, 0, 15, 17],
+    [20, 15, 0, 28],
+    [21, 17, 28, 0]
+]
+
+tsp(matrix)
+
