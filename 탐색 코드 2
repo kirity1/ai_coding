@@ -1,0 +1,179 @@
+#언덕등반알고리즘
+
+class State:
+    def __init__(self, board, goal, depth=0):
+        self.board = board
+        self.depth = depth
+        self.goal = goal
+
+    def get_new_board(self, i1, i2, depth):
+        new_board = self.board[:]
+        new_board[i1], new_board[i2] = new_board[i2], new_board[i1]
+        return State(new_board, self.goal, depth)
+
+    def expand(self, depth):
+        result = []
+        i = self.board.index(0)
+        if not i in [0, 3, 6]:
+            result.append(self.get_new_board(i, i - 1, depth))
+        if not i in [0, 1, 2]:
+            result.append(self.get_new_board(i, i - 3, depth))
+        if not i in [2, 5, 8]:
+            result.append(self.get_new_board(i, i + 1, depth))
+        if not i in [6, 7, 8]:
+            result.append(self.get_new_board(i, i + 3, depth))
+        return result
+
+    def __str__(self):
+        return str(self.board[:3]) + "\n" + \
+               str(self.board[3:6]) + "\n" + \
+               str(self.board[6:]) + "\n" + \
+               "----------------"
+
+    def __eq__(self, other):
+        return self.board == other.board
+
+    def __ne__(self, other):
+        return self.board != other.board
+
+    def heuristic(self):
+        distance = 0
+        for i in range(9):
+            if self.board[i] != 0:
+                goal_index = self.goal.index(self.board[i])
+                distance += abs(i // 3 - goal_index // 3) + abs(i % 3 - goal_index % 3)
+        return distance
+
+
+# 초기 상태와 목표 상태 설정
+initial_state = [2, 8, 3, 1, 6, 4, 7, 0, 5]
+goal_state = [1, 2, 3, 8, 0, 4, 7, 6, 5]
+
+# 초기 상태 객체 생성
+initial = State(initial_state, goal_state)
+
+# 언덕 등반 알고리즘
+def hill_climbing(initial):
+    current = initial
+    while True:
+        neighbors = current.expand(current.depth + 1)
+        next_state = None
+        next_heuristic = current.heuristic()
+
+        for neighbor in neighbors:
+            neighbor_heuristic = neighbor.heuristic()
+            if neighbor_heuristic < next_heuristic:
+                next_state = neighbor
+                next_heuristic = neighbor_heuristic
+
+        if next_state is None or next_heuristic >= current.heuristic():
+            break
+
+        current = next_state
+
+    return current
+
+# 실행
+print("Initial State:")
+print(initial)
+
+final_state = hill_climbing(initial)
+
+print("Final State:")
+print(final_state)
+
+if final_state.board == goal_state:
+    print("탐색 성공")
+else:
+    print("탐색 실패")
+
+import heapq
+
+class State:
+    def __init__(self, board, goal, depth=0):
+        self.board = board
+        self.depth = depth
+        self.goal = goal
+        self.priority = self.heuristic()
+
+    def get_new_board(self, i1, i2, depth):
+        new_board = self.board[:]
+        new_board[i1], new_board[i2] = new_board[i2], new_board[i1]
+        return State(new_board, self.goal, depth)
+
+    def expand(self, depth):
+        result = []
+        i = self.board.index(0)
+        if not i in [0, 3, 6]:
+            result.append(self.get_new_board(i, i - 1, depth))
+        if not i in [0, 1, 2]:
+            result.append(self.get_new_board(i, i - 3, depth))
+        if not i in [2, 5, 8]:
+            result.append(self.get_new_board(i, i + 1, depth))
+        if not i in [6, 7, 8]:
+            result.append(self.get_new_board(i, i + 3, depth))
+        return result
+
+    def __str__(self):
+        return str(self.board[:3]) + "\n" + \
+               str(self.board[3:6]) + "\n" + \
+               str(self.board[6:]) + "\n" + \
+               "----------------"
+
+    def __eq__(self, other):
+        return self.board == other.board
+
+    def __ne__(self, other):
+        return self.board != other.board
+
+    def heuristic(self):
+        distance = 0
+        for i in range(9):
+            if self.board[i] != 0:
+                goal_index = self.goal.index(self.board[i])
+                distance += abs(i // 3 - goal_index // 3) + abs(i % 3 - goal_index % 3)
+        return distance
+
+    def __lt__(self, other):
+        return self.priority < other.priority
+
+
+# 초기 상태와 목표 상태 설정
+initial_state = [2, 8, 3, 1, 6, 4, 7, 0, 5]
+goal_state = [1, 2, 3, 8, 0, 4, 7, 6, 5]
+
+# 초기 상태 객체 생성
+initial = State(initial_state, goal_state)
+
+# 최고 우선 탐색 알고리즘
+def best_first_search(initial):
+    open_queue = []
+    closed_queue = set()
+    heapq.heappush(open_queue, initial)
+
+    while open_queue:
+        current = heapq.heappop(open_queue)
+        print(current)
+        if current.board == goal_state:
+            return current
+
+        closed_queue.add(tuple(current.board))
+        for neighbor in current.expand(current.depth + 1):
+            if tuple(neighbor.board) in closed_queue:
+                continue
+            heapq.heappush(open_queue, neighbor)
+
+    return None
+
+# 실행
+print("Initial State:")
+print(initial)
+
+final_state = best_first_search(initial)
+
+print("Final State:")
+if final_state:
+    print(final_state)
+    print("탐색 성공")
+else:
+    print("탐색 실패")
